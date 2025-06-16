@@ -1,66 +1,72 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# LLM Analysis Technical Test (Backend Part) – (Laravel + Reverb WebSockets)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Welcome — and thanks for taking the time to show us how you build software!
+This repository contains a Laravel 11 project wired for Reverb WebSockets and a Vue client. Our tests emulate calls to a Large-Language-Model (LLM) in an asynchronous workflow. All code and an initial test-suite are already in place.
 
-## About Laravel
+Your mission is to improve and secure the backend by tackling the tasks below. Each task is designed to surface your problem-solving skills, code-design choices, and attention to quality.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Setup
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Dependencies
+- PHP (Setup has been done with v8.2.28)
+- Node.js (Setup has been done with v.18.19)
+- npm (Setup has been done with v10.2.3)
+- Composer (Setup has been done with v2.7.2)
+- Laravel 11
+- SQLite (Setup has been done with v3.43.2)
+- Redis (Setup has been done with v7.2.4)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## IDE
+You can use any IDE you like, we're used to work with Phpstorm.
 
-## Learning Laravel
+Fork the repo and then install it as you would install a classic laravel app.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Then run these commands to make server work, it will be useful for frontend integration:
+```
+php artisan serve
+php artisan reverb:start
+php artisan queue:work
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Project Architecture
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+app/
+├── Actions/
+│   └── LlmAnalysis.php               # orchestrates analysis request
+├── Events/
+│   └── LlmAnalysisDone.php           # broadcast when analysis completes
+├── Models/
+│   └── User.php                      # basic user model
+tests/
+├── Feature/                          # all tests are there
+```
 
-## Laravel Sponsors
+Reverb handles the websocket channel analysis so frontend clients receive the LlmAnalysisDone event when processing finishes.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## The exercise
 
-### Premium Partners
+1. **Bug-fix**: A recent code change broke the test-suite. First goal: make all tests green again.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+2. **Design**: LlmAnalysis currently returns hard-coded fake data. Refactor so we can swap a real LLM client in production while still using a test double in automated tests.
 
-## Contributing
+3. **Moderation layer**: We need protection against prompt injection / malicious content. Propose & implement a clean integration point to call an external moderation service before the LLM.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. **Error propagation**: At present, if llmService fails, the frontend never finds out. Ensure failures reach the client. Cover with a test if possible.
 
-## Code of Conduct
+5. **Channel security**: The LlmAnalysisDone event is published on a trivially guessable private channel. Harden the broadcast auth so only the owner of a given analysis can subscribe.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+6. **Payload validation**: Strengthen request validation (Spatie Laravel Data, native Validator, or another lib). Explain your choice and implement tighter rules.
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Running tests
 
-## License
+```bash
+php artisan test. # If it's red at beginning, that is normal, first task is to make them green again.
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Useful links
+
+- [Laravel 11 Broadcasting](https://laravel.com/docs/11.x/broadcasting)
+- [Laravel Actions](https://www.laravelactions.com/)
+
