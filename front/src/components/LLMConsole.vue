@@ -2,14 +2,11 @@
   <section class="llm-console">
     <h2>Analyse LLM</h2>
 
-    <form @submit.prevent="sendPrompt">
-      <label for="prompt">Prompt :</label>
-      <input
-        id="prompt"
-        v-model="prompt"
-        placeholder="Écris ton prompt ici"
-        required
-      />
+    <form class="llm-form" @submit.prevent="sendPrompt">
+      <div>
+        <label for="prompt">Prompt :</label>
+        <input id="prompt" v-model="prompt" placeholder="Écris ton prompt ici" required />
+      </div>
       <button type="submit">Analyser</button>
     </form>
 
@@ -40,8 +37,14 @@ const sendPrompt = () => {
 <style scoped>
 .llm-console {
   padding: 1rem;
-  max-width: 600px;
+  min-width: 400px;
   margin: auto;
+}
+
+.llm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 input {

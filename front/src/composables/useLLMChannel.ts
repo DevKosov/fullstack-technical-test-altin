@@ -3,7 +3,6 @@ import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
 import { useXsrfToken } from '@/composables/useXsrfToken'
 import axios from 'axios'
-
 axios.defaults.withCredentials = true
 
 const result: Ref = ref(null)
@@ -41,29 +40,29 @@ const connect = async () => {
     authorizer: (channel) => ({
       authorize: (socketId, callback) => {
         axios
-            .post(`${baseUrl}broadcasting/auth`, {
-              socket_id: socketId,
-              channel_name: channel.name,
-            })
-            .then((response) => {
-              console.log('Got autoriser response')
-              callback(false, response.data)
-            })
-            .catch((error) => {
-              console.error('Error autoriser response')
+          .post(`${baseUrl}broadcasting/auth`, {
+            socket_id: socketId,
+            channel_name: channel.name,
+          })
+          .then((response) => {
+            console.log('Got autoriser response')
+            callback(false, response.data)
+          })
+          .catch((error) => {
+            console.error('Error autoriser response')
 
-              throw error
-              // callback(true, error)
-            })
+            throw error
+            // callback(true, error)
+          })
       },
     }),
     csrfToken: token.value,
     withCredentials: true,
     auth: {
       headers: {
-        'X-CSRF-TOKEN': token.value
-      }
-    }
+        'X-CSRF-TOKEN': token.value,
+      },
+    },
   })
 
   echo.connector.pusher.connection.bind('connected', () => {
@@ -82,17 +81,14 @@ const connect = async () => {
 const send = async (prompt: string) => {
   const payload = {
     id: 'frontend-' + Date.now(),
-    prompt
+    prompt,
   }
   const { token } = useXsrfToken()
 
   try {
-
     await axios.post('http://localhost:8000/api/prompt', payload, {
       withCredentials: true,
-      headers: {
-        'X-XSRF-TOKEN': token.value
-      }
+      headers: {},
     })
   } catch (e) {
     console.error('❌ Failed to send prompt', e)
@@ -103,6 +99,6 @@ export const useLLMChannel = () => {
   return {
     result,
     connect,
-    send
+    send,
   }
 }

@@ -34,5 +34,3 @@ onMounted(() => {
     <LLMConsole v-if="user" />
   </main>
 </template>
-
-
