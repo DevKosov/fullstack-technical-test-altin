@@ -1,4 +1,6 @@
 // src/types/llm.ts
+
+/** Successful LLM payload */
 export type LlmSuccess = {
   summary: string
   sentiment: string
@@ -7,14 +9,17 @@ export type LlmSuccess = {
   duration_ms?: number
 }
 
+/** Error payload (when moderation/LLM fails) */
 export type LlmError = {
   status: 'error'
   error: string
   violations?: string[]
 }
 
+/** Union of success | error */
 export type LlmResultPayload = LlmSuccess | LlmError
 
+/** Envelope that the backend broadcasts */
 export interface LlmResultEnvelope {
   job_id: string
   prompt?: string
