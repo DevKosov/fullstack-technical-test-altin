@@ -45,3 +45,4 @@ I added a test to test the moderation layer and ran the tests, all tests were pa
 ### Error propagation
 > Error propagation: At present, if llmService fails, the frontend never finds out. Ensure failures reach the client. Cover with a test if possible.
 
+Added a try catch block in the llm analysis action to catch any exceptions thrown by the moderation or llm client. If an exception is caught, an error event is dispatched with the error message. I also added a test to test the error propagation and ran the tests, all tests were passing.

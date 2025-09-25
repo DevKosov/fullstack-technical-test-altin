@@ -27,20 +27,28 @@ class LlmAnalysis
 
     public function handle(string $jobId, string $prompt): void
     {
+        try {
+            $mod = $this->moderation->moderate($prompt);
 
-        $mod = $this->moderation->moderate($prompt);
+            if (!$mod->isSafe) {
+                LlmAnalysisDone::dispatch($jobId, [
+                    'status'  => 'error',
+                    'error'   => 'Prompt rejected by moderation',
+                    'violations' => $mod->violations,
+                ]);
+                return;
+            }
 
-        if (!$mod->isSafe) {
+            $result = $this->llm->analyze($prompt);
+
+            LlmAnalysisDone::dispatch($jobId, $result);
+        } catch (\Throwable $e) {
             LlmAnalysisDone::dispatch($jobId, [
                 'status'  => 'error',
-                'error'   => 'Prompt rejected by moderation',
-                'violations' => $mod->violations,
+                'error'   => $e->getMessage(), 
             ]);
+            report($e);
             return;
         }
-
-        $result = $this->llm->analyze($prompt);
-
-        LlmAnalysisDone::dispatch($jobId, $result);
     }
 }
