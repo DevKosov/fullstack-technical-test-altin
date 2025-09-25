@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Contracts\LlmClient;
+use App\Contracts\ModerationClient;
 use App\Events\LlmAnalysisDone;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -12,8 +13,7 @@ class LlmAnalysis
 {
     use AsAction;
 
-
-    public function __construct(private LlmClient $llm) {}
+    public function __construct(private LlmClient $llm, private ModerationClient $moderation) {}
 
     public function asController(Request $request): JsonResponse
     {
@@ -27,7 +27,18 @@ class LlmAnalysis
 
     public function handle(string $jobId, string $prompt): void
     {
-        
+
+        $mod = $this->moderation->moderate($prompt);
+
+        if (!$mod->isSafe) {
+            LlmAnalysisDone::dispatch($jobId, [
+                'status'  => 'error',
+                'error'   => 'Prompt rejected by moderation',
+                'violations' => $mod->violations,
+            ]);
+            return;
+        }
+
         $result = $this->llm->analyze($prompt);
 
         LlmAnalysisDone::dispatch($jobId, $result);
