@@ -2,8 +2,8 @@
 
 After setting up the project by installing its dependencies I started by the first task in hand, as described on the `read me` fixing the tests.
 
-## Bug-fix
->Bug-fix: A recent code change broke the test-suite. First goal: make all tests green again.
+## Back end
+> Bug-fix: A recent code change broke the test-suite. First goal: make all tests green again.
 
 After running php artisan test, i decided to first fix the llme2etest as it looked important.
 
@@ -59,4 +59,20 @@ I also had to modify the test to create an analysis before running the llm analy
 
 ### Payload validation
 > **Payload validation**: Strengthen request validation (Spatie Laravel Data, native Validator, or another lib). Explain your choice and implement tighter rules.
+
+
+
+## Front end 
+
+
+### Fix the unit tests
+I installed the dependencies, ran the tests and the login test was failing.
+
+I noticed in the test that the login form was not being submitted, so i added a submit event to the form and prevented the default behavior. This way the form is submitted when the button is clicked.
+
+I ran the tests again and the login test was passing.
+
+I also created a user with php artisan tinker and used that user to connect.
+
+### Handle a loading state while waiting for the LLM result.
 

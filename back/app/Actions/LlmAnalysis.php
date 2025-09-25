@@ -6,6 +6,7 @@ use App\Contracts\LlmClient;
 use App\Contracts\ModerationClient;
 use App\Events\LlmAnalysisDone;
 use App\Models\Analysis;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
