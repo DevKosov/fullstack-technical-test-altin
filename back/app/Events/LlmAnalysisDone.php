@@ -18,7 +18,7 @@ class LlmAnalysisDone implements ShouldBroadcast
      */
     public function __construct(
         public string $jobId,
-        public string  $result,
+        public array  $result,
     )
     {
     }
