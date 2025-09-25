@@ -22,6 +22,7 @@ describe('App', () => {
     const inputs = form.findAll('input')
     await inputs[0].setValue('testuser')
     await inputs[1].setValue('testpassword')
+    await form.trigger('submit.prevent')
     await new Promise(setImmediate)
     await wrapper.vm.$nextTick()
     expect(wrapper.findComponent(LLMConsole).exists()).toBe(true)

@@ -1,28 +1,19 @@
-import { ref, type Ref } from 'vue'
+// src/composables/useLLMChannel.ts
+import { ref } from 'vue'
 import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
-import { useXsrfToken } from '@/composables/useXsrfToken'
-import axios from 'axios'
-axios.defaults.withCredentials = true
+import { api } from '@/lib/api'
 
-const result: Ref = ref(null)
-
+const result = ref<any | null>(null)
+const loading = ref(false)
+const analysisId = ref<string | null>(null)
 let echo: Echo | null = null
-let socketId = ''
-let subscribed = false
-let channel: any = null
 
-const connect = async () => {
-  if (echo || subscribed) return
+export const connect = async () => {
+  if (echo) return
 
-  const { token, refresh } = useXsrfToken()
-  const baseUrl = 'http://localhost:8000/'
-  await refresh()
-
-  if (!token.value) {
-    console.error('❌ No XSRF token found')
-    return
-  }
+  // Make sure CSRF cookie exists (so /broadcasting/auth can read the session)
+  await api.get('/sanctum/csrf-cookie')
 
   // @ts-ignore
   window.Pusher = Pusher
@@ -30,75 +21,47 @@ const connect = async () => {
   echo = new Echo({
     broadcaster: 'pusher',
     key: 'local',
-    cluster: 'eu',
+    cluster: 'mt1', // pusher-js wants a cluster string
     wsHost: '127.0.0.1',
     wsPort: 8080,
     forceTLS: false,
     disableStats: true,
     enabledTransports: ['ws'],
-    authEndpoint: `${baseUrl}broadcasting/auth`,
+
+    // Use our axios client so cookies + XSRF header are sent
     authorizer: (channel) => ({
-      authorize: (socketId, callback) => {
-        axios
-          .post(`${baseUrl}broadcasting/auth`, {
+      authorize: async (socketId, callback) => {
+        try {
+          const { data } = await api.post('/broadcasting/auth', {
             socket_id: socketId,
             channel_name: channel.name,
           })
-          .then((response) => {
-            console.log('Got autoriser response')
-            callback(false, response.data)
-          })
-          .catch((error) => {
-            console.error('Error autoriser response')
-
-            throw error
-            // callback(true, error)
-          })
+          callback(false, data)
+        } catch (err: any) {
+          console.error('Channel auth failed', err?.response?.data || err)
+          callback(true, err)
+        }
       },
     }),
-    csrfToken: token.value,
-    withCredentials: true,
-    auth: {
-      headers: {
-        'X-CSRF-TOKEN': token.value,
-      },
-    },
   })
-
-  echo.connector.pusher.connection.bind('connected', () => {
-    socketId = echo?.socketId() ?? ''
-  })
-
-  channel = echo.private('analysis')
-
-  channel.listen('.llm.result', (data) => {
-    result.value = data
-  })
-
-  subscribed = true
 }
 
-const send = async (prompt: string) => {
-  const payload = {
-    id: 'frontend-' + Date.now(),
-    prompt,
-  }
-  const { token } = useXsrfToken()
+export const send = async (prompt: string) => {
+  if (!echo) await connect()
+  loading.value = true
+  result.value = null
+  analysisId.value = null
 
-  try {
-    await axios.post('http://localhost:8000/api/prompt', payload, {
-      withCredentials: true,
-      headers: {},
-    })
-  } catch (e) {
-    console.error('❌ Failed to send prompt', e)
-  }
+  // 1) Start analysis – server generates and stores the id
+  const { data } = await api.post('/api/prompt', { prompt })
+  analysisId.value = data.analysis_id
+
+  // 2) Subscribe to the correct channel: private-analysis.{id}
+  const channelName = `analysis.${analysisId.value}`
+  echo!.private(channelName).listen('.llm.result', (payload: any) => {
+    result.value = payload
+    loading.value = false
+  })
 }
 
-export const useLLMChannel = () => {
-  return {
-    result,
-    connect,
-    send,
-  }
-}
+export const useLLMChannel = () => ({ result, loading, analysisId, connect, send })

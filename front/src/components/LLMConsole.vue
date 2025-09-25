@@ -7,8 +7,10 @@
         <label for="prompt">Prompt :</label>
         <input id="prompt" v-model="prompt" placeholder="Écris ton prompt ici" required />
       </div>
-      <button type="submit">Analyser</button>
+      <button type="submit" :disabled="loading">Analyser</button>
     </form>
+
+    <p v-if="loading" class="waiting">⏳ Analyse en cours…</p>
 
     <div v-if="result" class="result">
       <h3>Résultat :</h3>
@@ -24,7 +26,7 @@ import { ref, onMounted } from 'vue'
 import { useLLMChannel } from '../composables/useLLMChannel'
 
 const prompt = ref('')
-const { result, connect, send } = useLLMChannel()
+const { result, connect, send, loading } = useLLMChannel()
 onMounted(() => {
   connect()
 })
