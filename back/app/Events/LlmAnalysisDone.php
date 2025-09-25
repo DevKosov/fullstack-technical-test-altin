@@ -33,7 +33,7 @@ class LlmAnalysisDone implements ShouldBroadcast
      */
     public function broadcastOn(): Channel
     {
-        return new PrivateChannel('analysis');
+        return new PrivateChannel('analysis.'.$this->jobId);
     }
 
     /**

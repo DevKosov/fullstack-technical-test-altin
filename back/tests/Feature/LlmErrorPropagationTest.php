@@ -28,10 +28,11 @@ it('broadcasts an error when the LLM client throws', function () {
         }
     });
 
-    $payload = ['id' => 'job-err-1', 'prompt' => 'any prompt'];
+    $jobId = 'job-err-1';
+    $prompt = 'any prompt';
 
     // Act
-    LlmAnalysis::run($payload['id'], $payload['prompt']);
+    LlmAnalysis::run($jobId, $prompt);
 
 
     // Assert: error frame was broadcast

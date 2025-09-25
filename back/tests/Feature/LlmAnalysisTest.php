@@ -17,7 +17,7 @@ it('should dispatch an LlmAnalysisDone event', function () {
     LlmAnalysis::run($jobId, $prompt);
 
     Event::assertDispatched(LlmAnalysisDone::class, function (LlmAnalysisDone $event) use ($jobId) {
-        expect($event->broadcastOn()->name)->toBe('private-analysis')
+        expect($event->broadcastOn()->name)->toBe('private-analysis.' . $jobId)
             ->and($event->broadcastAs())->toBe('llm.result')
             ->and($event->jobId)->toBe($jobId)
             ->and($event->result)->toHaveKeys(['summary', 'sentiment', 'keywords']);

@@ -46,3 +46,17 @@ I added a test to test the moderation layer and ran the tests, all tests were pa
 > Error propagation: At present, if llmService fails, the frontend never finds out. Ensure failures reach the client. Cover with a test if possible.
 
 Added a try catch block in the llm analysis action to catch any exceptions thrown by the moderation or llm client. If an exception is caught, an error event is dispatched with the error message. I also added a test to test the error propagation and ran the tests, all tests were passing.
+
+### Channel security
+> Channel security: The LlmAnalysisDone event is published on a trivially guessable private channel. Harden the broadcast auth so only the owner of a given analysis can subscribe.
+
+Added a new migration and model of analysis to store the analysis id and the user id. When an analysis is created, the analysis id is stored in the database along with the user id. The broadcast channel is then modified to check if the user id matches the user id of the analysis before allowing subscription.
+
+In the llm analysis action, the analysis id was given from the front end and was not generated on the backend, so i changed that to generate a uuid on the backend and return it to the front end. This meant that i will have to modify the front end to accept the analysis id from the backend.
+I also modified the dispatch of the event to use the analysis id.
+
+I also had to modify the test to create an analysis before running the llm analysis action.
+
+### Payload validation
+> **Payload validation**: Strengthen request validation (Spatie Laravel Data, native Validator, or another lib). Explain your choice and implement tighter rules.
+

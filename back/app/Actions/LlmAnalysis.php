@@ -5,8 +5,10 @@ namespace App\Actions;
 use App\Contracts\LlmClient;
 use App\Contracts\ModerationClient;
 use App\Events\LlmAnalysisDone;
+use App\Models\Analysis;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class LlmAnalysis
@@ -17,12 +19,16 @@ class LlmAnalysis
 
     public function asController(Request $request): JsonResponse
     {
-        $this->dispatch(
-            $request->input('id'),
-            $request->input('prompt')
-        );
+        $jobId =  (string) Str::uuid();
 
-        return response()->json(['status' => 'ok']);
+        Analysis::create([
+            'id'      => $jobId,
+            'user_id' => $request->user()->id,
+        ]);
+
+        $this->dispatch($jobId, (string) $request->input('prompt'));
+
+        return response()->json(['status' => 'ok', 'analysis_id' => $jobId]);
     }
 
     public function handle(string $jobId, string $prompt): void
@@ -47,7 +53,11 @@ class LlmAnalysis
                 'status'  => 'error',
                 'error'   => $e->getMessage(), 
             ]);
-            report($e);
+
+            if (! app()->environment('testing')) {
+                report($e);
+            }
+
             return;
         }
     }
