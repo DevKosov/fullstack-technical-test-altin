@@ -20,6 +20,11 @@ class LlmAnalysis
 
     public function asController(Request $request): JsonResponse
     {
+
+        $validated = $request->validate([
+            'prompt' => 'required|string|max:1000',
+        ]);
+
         $jobId =  (string) Str::uuid();
 
         Analysis::create([
@@ -27,7 +32,7 @@ class LlmAnalysis
             'user_id' => $request->user()->id,
         ]);
 
-        $this->dispatch($jobId, (string) $request->input('prompt'));
+        $this->dispatch($jobId, (string) $validated['prompt']);
 
         return response()->json(['status' => 'ok', 'analysis_id' => $jobId]);
     }
