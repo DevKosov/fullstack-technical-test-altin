@@ -1,94 +1,98 @@
 <template>
-   <section class="result-card" v-if="data">
-      <header class="result-header">
-         <h3>Résultat</h3>
-         <small v-if="data.prompt">Prompt : <code>{{ data.prompt }}</code></small>
-         <small>ID : <code>{{ data.job_id }}</code></small>
+   <section v-if="data"
+      class="w-full max-w-3xl mx-auto rounded-2xl border border-slate-200 bg-white/90 backdrop-blur shadow-lg p-6 min-w-[600px]"
+      aria-live="polite">
+      <header class="mb-4 flex items-start justify-between gap-4">
+         <div>
+            <h3 class="text-lg font-semibold text-slate-900">Résultat</h3>
+            <p v-if="data.prompt" class="mt-1 text-sm text-slate-600">
+               <span class="font-medium">Prompt :</span>
+               <code class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-slate-700">{{ data.prompt }}</code>
+            </p>
+         </div>
+         <small class="text-xs text-slate-500 shrink-0">
+            ID&nbsp;: <code class="font-mono">{{ data.job_id }}</code>
+         </small>
       </header>
 
       <!-- Loading -->
-      <div v-if="loading" class="loading">Analyse en cours…</div>
+      <div v-if="loading" class="flex items-center gap-3 text-slate-600">
+         <svg class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-20" />
+            <path d="M4 12a8 8 0 0 1 8-8" fill="currentColor" class="opacity-60" />
+         </svg>
+         <span>Analyse en cours…</span>
+      </div>
 
       <!-- Error -->
-      <div v-else-if="isError(data.result)" class="error">
-         <strong>Erreur :</strong> {{ data.result.error }}
-         <ul v-if="data.result.violations?.length">
-            <li v-for="v in data.result.violations" :key="v">{{ v }}</li>
+      <div v-else-if="isError(data.result)" class="rounded-xl border border-rose-200 bg-rose-50 text-rose-700 p-4"
+         role="alert">
+         <p class="font-medium">Erreur&nbsp;: {{ (data.result as any).error }}</p>
+         <ul v-if="(data.result as any).violations?.length" class="mt-2 list-disc pl-5 text-sm">
+            <li v-for="v in (data.result as any).violations" :key="v">{{ v }}</li>
          </ul>
-         <button v-if="showRetry" @click="$emit('retry')">Réessayer</button>
+
+         <div v-if="showRetry" class="mt-4">
+            <button type="button" @click="emit('retry')"
+               class="inline-flex items-center rounded-lg bg-rose-600 px-3 py-1.5 text-white text-sm font-medium hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500">
+               Réessayer
+            </button>
+         </div>
       </div>
 
       <!-- Success -->
-      <div v-else class="success">
-         <p><strong>Résumé :</strong> {{ data.result.summary }}</p>
-         <p><strong>Sentiment :</strong> {{ data.result.sentiment }}</p>
-         <p><strong>Mots clés :</strong> {{ data.result.keywords.join(', ') }}</p>
-         <p v-if="data.result.tokens != null"><strong>Tokens :</strong> {{ data.result.tokens }}</p>
-         <p v-if="data.result.duration_ms != null"><strong>Durée :</strong> {{ data.result.duration_ms }} ms</p>
+      <div v-else class="grid gap-3">
+         <p>
+            <span class="font-medium text-slate-700">Résumé :</span>
+            <span class="text-slate-900">{{ (data.result as any).summary }}</span>
+         </p>
+         <p>
+            <span class="font-medium text-slate-700">Sentiment :</span>
+            <span class="inline-flex items-center rounded-lg bg-slate-100 px-2 py-0.5 text-slate-800 text-sm">
+               {{ (data.result as any).sentiment }}
+            </span>
+         </p>
+         <p v-if="(data.result as any).keywords?.length">
+            <span class="font-medium text-slate-700">Mots clés :</span>
+            <span class="ml-1 text-slate-900">
+               {{ (data.result as any).keywords.join(', ') }}
+            </span>
+         </p>
+         <div class="flex flex-wrap gap-4 text-sm text-slate-600">
+            <p v-if="(data.result as any).tokens != null">
+               <span class="font-medium text-slate-700">Tokens :</span>
+               {{ (data.result as any).tokens }}
+            </p>
+            <p v-if="(data.result as any).duration_ms != null">
+               <span class="font-medium text-slate-700">Durée :</span>
+               {{ (data.result as any).duration_ms }} ms
+            </p>
+         </div>
       </div>
    </section>
 </template>
 
-<script setup lang="ts">
-import type { LlmResultEnvelope, LlmResultPayload } from '@/types/llm'
-import { isError } from '@/types/llm'
+<script lang="ts" setup>
 
-defineProps<{
-   data: LlmResultEnvelope | null
+import type { LlmErrorResult, LlmPayload } from '@/types/llm'
+
+/** Props */
+const props = defineProps<{
+   data: LlmPayload | null
    loading?: boolean
    showRetry?: boolean
 }>()
 
-defineEmits<{
+/** Emits */
+const emit = defineEmits<{
    (e: 'retry'): void
 }>()
 
-// re-export the guard so template can use it
-// (or use a computed wrapper if you prefer)
+/** Type guard */
+const isError = (r: LlmPayload['result']): r is LlmErrorResult =>
+   (r as LlmErrorResult).status === 'error'
 </script>
 
 <style scoped>
-.result-card {
-   margin-top: 1rem;
-   padding: 1rem;
-   border-radius: 12px;
-   background: #f7fafc;
-   color: #1a202c;
-   box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-}
-
-.result-header {
-   display: grid;
-   gap: .25rem;
-   margin-bottom: .75rem;
-}
-
-.loading {
-   font-style: italic;
-}
-
-.error {
-   color: #b91c1c;
-}
-
-.success {
-   color: #1a202c;
-}
-
-code {
-   background: #edf2f7;
-   padding: .1rem .3rem;
-   border-radius: 6px;
-}
-
-button {
-   margin-top: .5rem;
-   padding: .4rem .8rem;
-   border-radius: 8px;
-   border: 0;
-   background: #1f2937;
-   color: white;
-   cursor: pointer;
-}
+/* Optional: keep it purely Tailwind; no custom CSS required here. */
 </style>
- 
