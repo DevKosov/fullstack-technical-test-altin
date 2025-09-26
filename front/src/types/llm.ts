@@ -20,7 +20,6 @@ export type LlmResultPayload = LlmSuccess | LlmError
 /** Envelope that the backend broadcasts */
 export interface LlmResultEnvelope {
   job_id: string
-  prompt?: string
   result: LlmResultPayload
 }
 

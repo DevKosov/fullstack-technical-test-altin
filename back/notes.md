@@ -76,3 +76,25 @@ I also created a user with php artisan tinker and used that user to connect.
 
 ### Handle a loading state while waiting for the LLM result.
 
+Added loading state to the useLLMChannel composable and used it in the LLMConsole component to show a loading indicator while waiting for the llm result.
+
+### Create a component for the result using TS
+
+Created a new file stored in components folder named LlmResultCard.vue and moved the result display code from the LLMConsole component to the new component. Used props to pass the result data to the new component.
+
+
+### Define a type that matches the structure of the payload sent by the backend in the llm.result broadcast event.
+
+Created a new file stored in types folder named llm.ts and defined the types for the llm result payload. Used these types in the useLLMChannel composable and the LlmResultCard component.
+
+
+### Display the prompt in the result
+
+Updated the LlmResultCard component to display the prompt along with the result. Passed the prompt as a prop to the LlmResultCard component.
+
+### style login page
+
+I installed tailwindcss and configured it. I then added some basic styles to the login page to make it look better. 
+I also added some basic styles to the LLMConsole component to make it look better.
+
+I ran the tests again and all tests were passing.

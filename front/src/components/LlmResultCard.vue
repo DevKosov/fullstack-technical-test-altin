@@ -1,13 +1,13 @@
 <template>
    <section v-if="data"
-      class="w-full max-w-3xl mx-auto rounded-2xl border border-slate-200 bg-white/90 backdrop-blur shadow-lg p-6 min-w-[600px]"
-      aria-live="polite">
+      class="w-full max-w-3xl mx-auto rounded-2xl border border-slate-200 bg-white/90 backdrop-blur shadow-lg p-6 min-w-[600px]">
       <header class="mb-4 flex items-start justify-between gap-4">
          <div>
             <h3 class="text-lg font-semibold text-slate-900">Résultat</h3>
-            <p v-if="data.prompt" class="mt-1 text-sm text-slate-600">
-               <span class="font-medium">Prompt :</span>
-               <code class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-slate-700">{{ data.prompt }}</code>
+            <!-- ✅ Prompt comes from prop -->
+            <p v-if="prompt" class="mt-1 text-sm text-slate-600">
+               Prompt :
+               <code class="font-mono break-words">{{ prompt }}</code>
             </p>
          </div>
          <small class="text-xs text-slate-500 shrink-0">
@@ -72,7 +72,7 @@
    </section>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 
 import type { LlmErrorResult, LlmPayload } from '@/types/llm'
 
@@ -81,6 +81,7 @@ const props = defineProps<{
    data: LlmPayload | null
    loading?: boolean
    showRetry?: boolean
+   prompt?: string | null
 }>()
 
 /** Emits */

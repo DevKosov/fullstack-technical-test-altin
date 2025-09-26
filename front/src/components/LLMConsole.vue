@@ -51,7 +51,7 @@ const errorState = computed(() => {
 
     <!-- Result -->
     <div class="mt-6">
-      <LlmResultCard :data="envelope" :loading="loading" :showRetry="!!errorState" @retry="sendPrompt" />
+      <LlmResultCard :data="envelope" :loading="loading" :showRetry="!!errorState" @retry="sendPrompt" :prompt="prompt" />
     </div>
   </section>
 </template>
