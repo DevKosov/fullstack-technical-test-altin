@@ -35,16 +35,15 @@ const errorState = computed(() => {
       </div>
 
       <div class="flex items-center justify-between">
-        <p class="text-sm text-slate-500">
-          Conseil : essaye une phrase décrivant un article ou un avis.
-        </p>
         <button type="submit" :disabled="loading || !prompt.trim()"
           class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-white font-medium
                  hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          
           <svg v-if="loading" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25" />
             <path d="M4 12a8 8 0 0 1 8-8" fill="currentColor" class="opacity-75" />
           </svg>
+
           <span>{{ loading ? 'Analyse en cours…' : 'Analyser' }}</span>
         </button>
       </div>

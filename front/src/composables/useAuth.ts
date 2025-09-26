@@ -1,4 +1,3 @@
-// src/composables/useAuth.ts
 import { ref } from 'vue'
 import { api } from '@/lib/api'
 

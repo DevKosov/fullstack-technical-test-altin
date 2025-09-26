@@ -1,4 +1,3 @@
-// src/composables/useLLMChannel.ts
 import { ref } from 'vue'
 import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
@@ -52,7 +51,7 @@ export const send = async (prompt: string) => {
   result.value = null
   analysisId.value = null
 
-  // 1) Start analysis – server generates and stores the id
+  
   const { data } = await api.post('/api/prompt', { prompt })
   analysisId.value = data.analysis_id
 

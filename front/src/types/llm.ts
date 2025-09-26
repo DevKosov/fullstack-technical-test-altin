@@ -1,5 +1,3 @@
-// src/types/llm.ts
-
 /** Successful LLM payload */
 export type LlmSuccess = {
   summary: string
