@@ -60,7 +60,7 @@ I also had to modify the test to create an analysis before running the llm analy
 ### Payload validation
 > **Payload validation**: Strengthen request validation (Spatie Laravel Data, native Validator, or another lib). Explain your choice and implement tighter rules.
 
-
+I used the native validator to validate the prompt, i added rules to ensure that the prompt is a required string and has a maximum length of 1000 characters. I chose the native validator because it is simple to use and does not require any additional dependencies.
 
 ## Front end 
 
