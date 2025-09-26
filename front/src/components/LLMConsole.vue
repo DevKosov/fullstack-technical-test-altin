@@ -5,7 +5,7 @@ import LlmResultCard from '@/components/LlmResultCard.vue'
 import type { LlmResultEnvelope } from '@/types/llm'
 
 const prompt = ref('')
-const { result, loading, analysisId, connect, send } = useLLMChannel()
+const { result, loading, connect, send } = useLLMChannel()
 
 onMounted(() => { connect() })
 
